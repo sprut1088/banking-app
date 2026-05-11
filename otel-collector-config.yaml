@@ -20,9 +20,6 @@ processors:
 exporters:
   prometheus:
     endpoint: "0.0.0.0:8889"
-  jaeger:
-    endpoint: "jaeger:14250"
-    tls: { insecure: true }
   splunk_hec:
     endpoint: "http://10.235.21.132:8088/services/collector"
     token: "2bc8a6c2-a512-4afe-aebd-bf34dd4a5910"
@@ -38,7 +35,7 @@ service:
     traces:
       receivers: [otlp]
       processors: [memory_limiter, batch]
-      exporters: [jaeger, logging]
+      exporters: [logging]
     metrics:
       receivers: [otlp, prometheus]
       processors: [memory_limiter, batch]
