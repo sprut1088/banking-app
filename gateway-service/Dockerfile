@@ -2,17 +2,15 @@ FROM maven:3.9.8-eclipse-temurin-21 AS builder
 WORKDIR /app
 COPY pom.xml /app/pom.xml
 COPY gateway-service /app/gateway-service
-RUN mvn -pl gateway-service -am clean package -DskipTests
+COPY auth-service /app/auth-service
+COPY account-service /app/account-service
+COPY transaction-service /app/transaction-service
+COPY card-service /app/card-service
+COPY payment-service /app/payment-service
+RUN mvn -pl gateway-service -am clean package spring-boot:repackage -DskipTests
 
 FROM eclipse-temurin:21-jre
 WORKDIR /app
-ADD https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v2.5.0/opentelemetry-javaagent.jar /otel/opentelemetry-javaagent.jar
-ENV JAVA_TOOL_OPTIONS="-javaagent:/otel/opentelemetry-javaagent.jar"
-ENV OTEL_SERVICE_NAME=gateway-service
-ENV OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
-ENV OTEL_METRICS_EXPORTER=otlp
-ENV OTEL_TRACES_EXPORTER=otlp
-ENV OTEL_LOGS_EXPORTER=otlp
+ADD https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v2.5.0/opentelemetry-javaagent.jar /app/opentelemetry-javaagent.jar
 COPY --from=builder /app/gateway-service/target/gateway-service-1.0.0.jar app.jar
-EXPOSE 7080
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+ENTRYPOINT ["java", "-javaagent:/app/opentelemetry-javaagent.jar", "-jar", "app.jar"]
