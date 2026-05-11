@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 app = FastAPI(title="Banking Load Generator", version="1.0.0")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://frontend:3000"],
+    allow_origins=["http://10.235.21.132:3000", "http://frontend:3000"],
     allow_methods=["*"],
     allow_headers=["*"],
 )

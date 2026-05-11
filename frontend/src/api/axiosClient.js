@@ -11,7 +11,7 @@ export function setAuthCredentials(username, password) {
 }
 
 const axiosClient = axios.create({
-  baseURL: 'http://localhost:7080'
+  baseURL: 'http://10.235.21.132:7080'
 });
 
 axiosClient.interceptors.request.use((config) => {

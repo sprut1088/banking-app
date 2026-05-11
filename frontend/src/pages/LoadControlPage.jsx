@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Navbar from '../components/Navbar';
 
 const FLOW_NAMES = ['LOGIN_FLOW', 'PAYMENT_FLOW', 'CARD_FLOW', 'ACCOUNT_FLOW', 'TRANSACTION_FLOW'];
-const LOAD_API = 'http://localhost:8090';
+const LOAD_API = 'http://10.235.21.132:8090';
 
 export default function LoadControlPage() {
   const [status, setStatus] = useState(null);
