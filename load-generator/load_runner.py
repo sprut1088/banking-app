@@ -12,7 +12,7 @@ from metrics_store import MetricsStore
 
 logger = logging.getLogger(__name__)
 
-GATEWAY_URL = os.getenv("GATEWAY_URL", "http://gateway-service:8080")
+GATEWAY_URL = os.getenv("GATEWAY_URL", "http://gateway-service:7080")
 TPS_PER_FLOW = float(os.getenv("TPS_PER_FLOW", "3"))
 SLEEP_SECONDS = max(0.01, 1.0 / TPS_PER_FLOW)
 

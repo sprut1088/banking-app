@@ -122,7 +122,7 @@ services:
     depends_on:
       - gateway-service
     environment:
-      GATEWAY_URL: http://gateway-service:8080
+      GATEWAY_URL: http://gateway-service:7080
       TPS_PER_FLOW: 3
     ports:
       - "8090:8090"

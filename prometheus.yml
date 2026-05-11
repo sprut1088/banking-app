@@ -13,35 +13,35 @@ scrape_configs:
   - job_name: gateway-service
     metrics_path: /actuator/prometheus
     static_configs:
-      - targets: ["gateway-service:8080"]
+      - targets: ["gateway-service:7080"]
         labels: { service: gateway }
 
   - job_name: auth-service
     metrics_path: /actuator/prometheus
     static_configs:
-      - targets: ["auth-service:8081"]
+      - targets: ["auth-service:7081"]
         labels: { service: auth }
 
   - job_name: account-service
     metrics_path: /actuator/prometheus
     static_configs:
-      - targets: ["account-service:8082"]
+      - targets: ["account-service:7082"]
         labels: { service: account }
 
   - job_name: transaction-service
     metrics_path: /actuator/prometheus
     static_configs:
-      - targets: ["transaction-service:8083"]
+      - targets: ["transaction-service:7083"]
         labels: { service: transaction }
 
   - job_name: card-service
     metrics_path: /actuator/prometheus
     static_configs:
-      - targets: ["card-service:8084"]
+      - targets: ["card-service:7084"]
         labels: { service: card }
 
   - job_name: payment-service
     metrics_path: /actuator/prometheus
     static_configs:
-      - targets: ["payment-service:8085"]
+      - targets: ["payment-service:7085"]
         labels: { service: payment }

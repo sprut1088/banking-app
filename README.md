@@ -14,7 +14,7 @@ Lightweight banking microservices platform with Spring Boot 3.3, React 18, Pytho
 																v
 										 +----------+-----------+
 										 |     Gateway API      |
-										 |  Spring Boot :8080   |
+										 |  Spring Boot :7080   |
 										 +-----+---+---+---+----+
 													 |   |   |   |
 				+------------------+   |   |   +------------------+
@@ -22,13 +22,13 @@ Lightweight banking microservices platform with Spring Boot 3.3, React 18, Pytho
 				v                      v   v                      v
 +---------------+   +---------------+   +---------------+   +---------------+
 | Auth Service  |   | Account Svc   |   | Txn Service   |   | Card Service  |
-| :8081         |   | :8082         |   | :8083         |   | :8084         |
+| :7081         |   | :7082         |   | :7083         |   | :7084         |
 +---------------+   +---------------+   +---------------+   +---------------+
 													 |
 													 v
 										 +---------------+
 										 | Payment Svc   |
-										 | :8085         |
+										 | :7085         |
 										 +---------------+
 
 Load + Ops Sidecar:
@@ -83,12 +83,12 @@ docker compose down
 | Component | URL | Notes |
 |---|---|---|
 | Frontend | http://localhost:3000 | React app via Nginx |
-| Gateway API | http://localhost:8080 | Entry point for banking API |
-| Auth Service | http://localhost:8081/swagger-ui/index.html | OpenAPI UI |
-| Account Service | http://localhost:8082/swagger-ui/index.html | OpenAPI UI |
-| Transaction Service | http://localhost:8083/swagger-ui/index.html | OpenAPI UI |
-| Card Service | http://localhost:8084/swagger-ui/index.html | OpenAPI UI |
-| Payment Service | http://localhost:8085/swagger-ui/index.html | OpenAPI UI |
+| Gateway API | http://localhost:7080 | Entry point for banking API |
+| Auth Service | http://localhost:7081/swagger-ui/index.html | OpenAPI UI |
+| Account Service | http://localhost:7082/swagger-ui/index.html | OpenAPI UI |
+| Transaction Service | http://localhost:7083/swagger-ui/index.html | OpenAPI UI |
+| Card Service | http://localhost:7084/swagger-ui/index.html | OpenAPI UI |
+| Payment Service | http://localhost:7085/swagger-ui/index.html | OpenAPI UI |
 | Load Control API | http://localhost:8090 | FastAPI control endpoints |
 | Load Metrics | http://localhost:8090/metrics | Prometheus format |
 

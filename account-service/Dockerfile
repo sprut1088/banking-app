@@ -14,5 +14,5 @@ ENV OTEL_METRICS_EXPORTER=otlp
 ENV OTEL_TRACES_EXPORTER=otlp
 ENV OTEL_LOGS_EXPORTER=otlp
 COPY --from=builder /app/account-service/target/account-service-1.0.0.jar app.jar
-EXPOSE 8082
+EXPOSE 7082
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]
