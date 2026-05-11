@@ -1,0 +1,139 @@
+version: "3.9"
+
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.102.0
+    command: ["--config=/etc/otel/config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel/config.yaml:ro
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+      - "8889:8889"
+
+  prometheus:
+    image: prom/prometheus:v2.52.0
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.58
+    ports:
+      - "16686:16686"
+      - "14250:14250"
+
+  grafana:
+    image: grafana/grafana:10.4.0
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    depends_on:
+      - prometheus
+    ports:
+      - "3001:3000"
+
+  splunk:
+    image: splunk/splunk:9.2
+    environment:
+      SPLUNK_START_ARGS: --accept-license
+      SPLUNK_HEC_TOKEN: your-splunk-hec-token
+      SPLUNK_PASSWORD: admin123
+    ports:
+      - "8000:8000"
+      - "8088:8088"
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: auth-service/Dockerfile
+    depends_on:
+      - otel-collector
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    ports:
+      - "7081:7081"
+
+  account-service:
+    build:
+      context: .
+      dockerfile: account-service/Dockerfile
+    depends_on:
+      - otel-collector
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    ports:
+      - "7082:7082"
+
+  transaction-service:
+    build:
+      context: .
+      dockerfile: transaction-service/Dockerfile
+    depends_on:
+      - otel-collector
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    ports:
+      - "7083:7083"
+
+  card-service:
+    build:
+      context: .
+      dockerfile: card-service/Dockerfile
+    depends_on:
+      - otel-collector
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    ports:
+      - "7084:7084"
+
+  payment-service:
+    build:
+      context: .
+      dockerfile: payment-service/Dockerfile
+    depends_on:
+      - otel-collector
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    ports:
+      - "7085:7085"
+
+  gateway-service:
+    build:
+      context: .
+      dockerfile: gateway-service/Dockerfile
+    depends_on:
+      - otel-collector
+      - auth-service
+      - account-service
+      - transaction-service
+      - card-service
+      - payment-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    ports:
+      - "7080:7080"
+
+  load-generator:
+    build: ./load-generator
+    depends_on:
+      - gateway-service
+    environment:
+      GATEWAY_URL: http://gateway-service:8080
+      TPS_PER_FLOW: 3
+    ports:
+      - "8090:8090"
+
+  frontend:
+    build: ./frontend
+    depends_on:
+      - gateway-service
+      - load-generator
+    ports:
+      - "3000:80"
+
+volumes:
+  grafana-storage:

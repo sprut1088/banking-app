@@ -1,0 +1,28 @@
+server:
+  port: 7084
+
+spring:
+  application:
+    name: card-service
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+otel:
+  service:
+    name: card-service
+  exporter:
+    otlp:
+      endpoint: http://otel-collector:4318
+  instrumentation:
+    logback-appender:
+      enabled: true
+    spring-webmvc:
+      enabled: true

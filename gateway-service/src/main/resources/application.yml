@@ -1,0 +1,28 @@
+server:
+  port: 7080
+
+spring:
+  application:
+    name: gateway-service
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+otel:
+  service:
+    name: gateway-service
+  exporter:
+    otlp:
+      endpoint: http://otel-collector:4318
+  instrumentation:
+    logback-appender:
+      enabled: true
+    spring-webmvc:
+      enabled: true

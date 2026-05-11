@@ -1,0 +1,49 @@
+receivers:
+  otlp:
+    protocols:
+      grpc: { endpoint: 0.0.0.0:4317 }
+      http: { endpoint: 0.0.0.0:4318 }
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: load-generator
+          scrape_interval: 15s
+          static_configs:
+            - targets: ["load-generator:8090"]
+
+processors:
+  batch: {}
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 512
+
+exporters:
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+  jaeger:
+    endpoint: "jaeger:14250"
+    tls: { insecure: true }
+  splunk_hec:
+    endpoint: "http://splunk:8088/services/collector"
+    token: "your-splunk-hec-token"
+    source: "banking-app"
+    sourcetype: "java-otel"
+    index: "main"
+    tls: { insecure_skip_verify: true }
+  logging:
+    verbosity: detailed
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [jaeger, logging]
+    metrics:
+      receivers: [otlp, prometheus]
+      processors: [memory_limiter, batch]
+      exporters: [prometheus, logging]
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [splunk_hec, logging]
