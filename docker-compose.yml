@@ -20,6 +20,7 @@ services:
       - otel-collector
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
     ports:
       - "7081:7081"
 
@@ -31,6 +32,7 @@ services:
       - otel-collector
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
     ports:
       - "7082:7082"
 
@@ -42,6 +44,7 @@ services:
       - otel-collector
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
     ports:
       - "7083:7083"
 
@@ -53,6 +56,7 @@ services:
       - otel-collector
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
     ports:
       - "7084:7084"
 
@@ -64,6 +68,7 @@ services:
       - otel-collector
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
     ports:
       - "7085:7085"
 
@@ -80,6 +85,7 @@ services:
       - payment-service
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
     ports:
       - "7080:7080"
 
@@ -89,6 +95,7 @@ services:
       - gateway-service
     environment:
       GATEWAY_URL: http://gateway-service:7080
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
       TPS_PER_FLOW: 3
     ports:
       - "8090:8090"
@@ -98,5 +105,8 @@ services:
     depends_on:
       - gateway-service
       - load-generator
+      - otel-collector
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
     ports:
       - "5174:80"
