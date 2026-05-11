@@ -24,8 +24,8 @@ exporters:
     endpoint: "jaeger:14250"
     tls: { insecure: true }
   splunk_hec:
-    endpoint: "http://splunk:8088/services/collector"
-    token: "your-splunk-hec-token"
+    endpoint: "http://10.235.21.132:8088/services/collector"
+    token: "2bc8a6c2-a512-4afe-aebd-bf34dd4a5910"
     source: "banking-app"
     sourcetype: "java-otel"
     index: "main"
