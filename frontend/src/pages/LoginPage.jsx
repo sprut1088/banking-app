@@ -38,7 +38,7 @@ export default function LoginPage() {
   return (
     <div className="login-shell">
       <form className="login-card" onSubmit={handleSubmit}>
-        <h1>Aster Bank</h1>
+        <h1>Banking Demo App</h1>
         <p>Secure online banking portal</p>
         <label>Username</label>
         <input value={username} onChange={(e) => setUsername(e.target.value)} required />
