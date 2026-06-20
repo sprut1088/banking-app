@@ -511,10 +511,10 @@ Update format:
   - Add mock document verification timeline.
 - Dependencies: P5-T2
 - Owner: UNASSIGNED
-- Status: READY
-- Started On: _
+- Status: IN_REVIEW
+- Started On: 2026-06-20
 - Closed On: _
-- Evidence: _
+- Evidence: Added frontend profile store (`customerProfileStore`) with persisted mock updates; enhanced Accounts page with Customer/KYC snapshot, editable contact preferences, and document verification timeline; surfaced KYC/risk eligibility state in Payments/Transfers and enforced SEPA eligibility guardrails.
 - Acceptance checks:
   - Profile data loads from API and persists mock updates.
   - KYC state is visible in payment and transfer eligibility decisions.

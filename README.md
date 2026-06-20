@@ -72,6 +72,16 @@ From repository root:
 docker compose up --build
 ```
 
+Secret handling for Splunk HEC token:
+
+1. Copy `.env.local.example` to `.env.local`.
+2. Set `SPLUNK_HEC_TOKEN` in `.env.local`.
+3. Start with env file:
+
+```bash
+docker compose --env-file .env.local up --build
+```
+
 Stop and remove containers:
 
 ```bash

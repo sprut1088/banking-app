@@ -1,14 +1,18 @@
 import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import axiosClient from '../api/axiosClient';
 import { useAuth } from '../context/AuthContext';
+import { getCustomerProfile, getPaymentEligibility } from '../api/customerProfileStore';
 
 export default function PaymentPage() {
   const { auth } = useAuth();
+  const location = useLocation();
   const [payees, setPayees] = useState([]);
   const [history, setHistory] = useState([]);
   const [card, setCard] = useState(null);
   const [accountNumber, setAccountNumber] = useState('');
+  const [profile, setProfile] = useState(null);
   const [form, setForm] = useState({
     toPayeeId: 'PAY001',
     amount: '25.00',
@@ -30,6 +34,11 @@ export default function PaymentPage() {
     setHistory(historyRes.data);
     setAccountNumber(accountRes.data.accountNumber);
     setCard(cardRes.data);
+    setProfile(getCustomerProfile({
+      customerId: auth.customerId,
+      customerName: accountRes.data.accountHolderName,
+      residencyCountry: 'DE'
+    }));
   };
 
   useEffect(() => {
@@ -39,6 +48,18 @@ export default function PaymentPage() {
   const submitPayment = async (e) => {
     e.preventDefault();
     setMessage(null);
+
+    const eligibility = getPaymentEligibility(profile);
+    if (!eligibility.canSubmit) {
+      setMessage({ type: 'error', text: eligibility.reason });
+      return;
+    }
+
+    if (form.settlementType === 'SEPA' && !eligibility.sepaEnabled) {
+      setMessage({ type: 'error', text: 'SEPA is not eligible for current KYC/risk state. Choose INSTANT settlement.' });
+      return;
+    }
+
     try {
       const response = await axiosClient.post('/api/payments/submit', {
         customerId: auth.customerId,
@@ -61,11 +82,28 @@ export default function PaymentPage() {
     }
   };
 
+  const isTransferView = location.pathname === '/transfers';
+  const title = isTransferView ? 'Transfers' : 'Payments';
+  const submitLabel = isTransferView ? 'Submit Transfer' : 'Submit Payment';
+  const eligibility = getPaymentEligibility(profile);
+
   return (
     <div className="page-shell">
       <Navbar />
       <main className="content">
-        <h2>Payments</h2>
+        <h2>{title}</h2>
+        {profile && (
+          <section className="eligibility-banner">
+            <div className="eligibility-header">
+              <span className="badge">KYC {profile.kycLevel}</span>
+              <span className={profile.verificationStatus === 'VERIFIED' ? 'badge ok' : 'badge warn'}>{profile.verificationStatus}</span>
+              <span className={profile.riskBand === 'LOW' ? 'badge ok' : 'badge warn'}>Risk {profile.riskBand}</span>
+              <span className="badge">Residency {profile.residencyCountry}</span>
+            </div>
+            <p className="note">Eligibility: Instant {eligibility.instantEnabled ? 'enabled' : 'disabled'} | SEPA {eligibility.sepaEnabled ? 'enabled' : 'disabled'}.</p>
+            <p className="note">{eligibility.reason}</p>
+          </section>
+        )}
         <p className="note">Demo failure shortcuts: set reference including "FAIL", or submit SEPA payments above EUR 2000.</p>
         <form className="payment-form" onSubmit={submitPayment}>
           <label>From Account</label>
@@ -80,7 +118,7 @@ export default function PaymentPage() {
           <label>Settlement Type</label>
           <select value={form.settlementType} onChange={(e) => setForm({ ...form, settlementType: e.target.value })}>
             <option value="INSTANT">INSTANT</option>
-            <option value="SEPA">SEPA</option>
+            <option value="SEPA" disabled={!eligibility.sepaEnabled}>SEPA</option>
           </select>
 
           <label>Payee</label>
@@ -96,7 +134,7 @@ export default function PaymentPage() {
 
           <label>Available Card Credit</label>
           <input value={card ? `EUR ${Number(card.availableCredit).toFixed(2)}` : 'Loading...'} readOnly />
-          <button type="submit">Submit Payment</button>
+          <button type="submit" disabled={!eligibility.canSubmit}>{submitLabel}</button>
         </form>
 
         {message && <div className={message.type === 'success' ? 'success-banner' : 'error-banner'}>{message.text}</div>}
