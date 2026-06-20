@@ -493,10 +493,10 @@ Update format:
   - Add global search entry point.
 - Dependencies: P5-T1
 - Owner: UNASSIGNED
-- Status: READY
-- Started On: _
+- Status: IN_REVIEW
+- Started On: 2026-06-20
 - Closed On: _
-- Evidence: _
+- Evidence: Upgraded shared navbar with required sections (Overview, Accounts, Cards, Payments, Transfers, Statements, Security, Support), added global section search with route navigation, added route-based breadcrumb/page context header, and wired new section routes/pages for Security and Support without changing existing API/business logic.
 - Acceptance checks:
   - User reaches any key workflow in <=3 clicks.
   - Active navigation and route guards work consistently.
