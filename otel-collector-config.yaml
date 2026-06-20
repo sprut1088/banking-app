@@ -23,7 +23,7 @@ exporters:
     endpoint: "0.0.0.0:8889"
   splunk_hec:
     endpoint: "https://10.235.21.132:8088/services/collector"
-    token: "7931493c-b2d9-47d8-b460-d95915a9741d"
+    token: "SPLUNK_HEC_TOKEN"
     source: "banking-app"
     sourcetype: "java-otel"
     index: "banking"
