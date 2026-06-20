@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
 import axiosClient from '../api/axiosClient';
 import { useAuth } from '../context/AuthContext';
+import { Card } from '../components/ui';
 
 export default function DashboardPage() {
   const { auth } = useAuth();
@@ -35,10 +36,10 @@ export default function DashboardPage() {
       <main className="content">
         <h2>Welcome, {auth.customerName}</h2>
         <div className="card-grid">
-          <article className="info-card"><h3>Account Balance</h3><p>{summary.balance}</p></article>
-          <article className="info-card"><h3>Recent Transactions</h3><p>{summary.txCount}</p></article>
-          <article className="info-card"><h3>Card Status</h3><p>{summary.cardStatus}</p></article>
-          <article className="info-card"><h3>Quick Pay</h3><p>{summary.payees} Payees Ready</p></article>
+          <Card className="info-card" title="Account Balance"><p>{summary.balance}</p></Card>
+          <Card className="info-card" title="Recent Transactions"><p>{summary.txCount}</p></Card>
+          <Card className="info-card" title="Card Status"><p>{summary.cardStatus}</p></Card>
+          <Card className="info-card" title="Quick Pay"><p>{summary.payees} Payees Ready</p></Card>
         </div>
       </main>
     </div>

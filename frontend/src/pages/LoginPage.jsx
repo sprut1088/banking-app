@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import { useAuth } from '../context/AuthContext';
+import { Button, Card, InputField } from '../components/ui';
 
 export default function LoginPage() {
   const [username, setUsername] = useState('alice');
@@ -37,16 +38,27 @@ export default function LoginPage() {
 
   return (
     <div className="login-shell">
-      <form className="login-card" onSubmit={handleSubmit}>
+      <Card as="form" className="login-card" onSubmit={handleSubmit}>
         <h1>Banking Demo App</h1>
         <p>Secure online banking portal</p>
-        <label>Username</label>
-        <input value={username} onChange={(e) => setUsername(e.target.value)} required />
-        <label>Password</label>
-        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+        <InputField
+          id="username"
+          label="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          required
+        />
+        <InputField
+          id="password"
+          label="Password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
         {error && <div className="error-banner">{error}</div>}
-        <button type="submit" disabled={loading}>{loading ? 'Signing In...' : 'Login'}</button>
-      </form>
+        <Button type="submit" disabled={loading}>{loading ? 'Signing In...' : 'Login'}</Button>
+      </Card>
     </div>
   );
 }
