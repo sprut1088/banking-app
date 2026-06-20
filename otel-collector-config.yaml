@@ -1,6 +1,4 @@
 
-
-
 receivers:
   otlp:
     protocols:
@@ -25,10 +23,10 @@ exporters:
     endpoint: "0.0.0.0:8889"
   splunk_hec:
     endpoint: "http://10.235.21.132:8088/services/collector"
-    token: "2bc8a6c2-a512-4afe-aebd-bf34dd4a5910"
+    token: "7931493c-b2d9-47d8-b460-d95915a9741d"
     source: "banking-app"
     sourcetype: "java-otel"
-    index: "main"
+    index: "banking"
     tls: { insecure_skip_verify: true }
   logging:
     verbosity: detailed
