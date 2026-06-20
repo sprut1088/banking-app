@@ -547,10 +547,10 @@ Update format:
   - Add search and filter by status and country.
 - Dependencies: P5-T3
 - Owner: UNASSIGNED
-- Status: READY
-- Started On: _
+- Status: IN_REVIEW
+- Started On: 2026-06-20
 - Closed On: _
-- Evidence: _
+- Evidence: Added beneficiary management module with CRUD fields (alias, IBAN/account number, bank code, country, risk flag), verification states (PENDING/VERIFIED/BLOCKED), search and status/country filtering, and payment submit guardrails that enforce beneficiary status and block ineligible recipients with explicit error messages.
 - Acceptance checks:
   - Payment initiation enforces beneficiary status rules.
   - Blocked beneficiaries are prevented with clear errors.
@@ -565,10 +565,10 @@ Update format:
   - Add fee estimate and execution ETA preview.
 - Dependencies: P5-T5
 - Owner: UNASSIGNED
-- Status: READY
-- Started On: _
+- Status: IN_REVIEW
+- Started On: 2026-06-20
 - Closed On: _
-- Evidence: _
+- Evidence: Added transfer-type selection (OWN_ACCOUNT/DOMESTIC_EXTERNAL/INTERNATIONAL_MOCK), scheduling modes (NOW/FUTURE_DATE/RECURRING_TEMPLATE), fee and ETA preview card, and scheduled-transfer management list with edit/cancel actions persisted in local schedule store.
 - Acceptance checks:
   - User can submit instant and SEPA flows with ETA/fees visible.
   - Scheduled transfers are listed with editable/cancel states.
@@ -583,10 +583,10 @@ Update format:
   - Add virtual card create/delete mock flow.
 - Dependencies: P5-T1
 - Owner: UNASSIGNED
-- Status: READY
-- Started On: _
+- Status: IN_REVIEW
+- Started On: 2026-06-20
 - Closed On: _
-- Evidence: _
+- Evidence: Added card management console with lock/unlock, ATM/ecommerce/POS channel toggles, day/week/month spend limit controls, virtual card create/delete flows, and persistent card-control audit trail; integrated card-rail authorization checks in Payments using these controls so disabled channels/locks/limit breaches block transactions.
 - Acceptance checks:
   - Card control changes affect authorization simulation paths.
   - Audit trail captures all control updates.
@@ -601,10 +601,10 @@ Update format:
   - Add filters for amount, merchant, category, and status.
 - Dependencies: P5-T4
 - Owner: UNASSIGNED
-- Status: READY
-- Started On: _
+- Status: IN_REVIEW
+- Started On: 2026-06-20
 - Closed On: _
-- Evidence: _
+- Evidence: Added dedicated Statements Center page with monthly account/card statements for latest 6 months, filter controls (amount, merchant, category, status), mock CSV/PDF export actions, and export audit logging; routed `/statements` to new page.
 - Acceptance checks:
   - Statement generation works for at least 6 months mock history.
   - Export actions are logged for compliance demo.
