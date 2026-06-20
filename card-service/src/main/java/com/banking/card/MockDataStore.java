@@ -1,14 +1,20 @@
 package com.banking.card;
 
 import com.banking.card.dto.CardDto;
+import com.banking.card.dto.CardTransactionDto;
 
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public final class MockDataStore {
 
     public static final Map<String, CardDto> CARDS = new LinkedHashMap<>();
+    public static final Map<String, List<CardTransactionDto>> CARD_TRANSACTIONS_BY_CUSTOMER = new LinkedHashMap<>();
 
     static {
         CARDS.put("CUST001", new CardDto("CARD001", "CUST001", "Alice Murphy", "**** **** **** 1021", "VISA", "11/28", "***", new BigDecimal("5000.00"), new BigDecimal("4200.00"), "ACTIVE"));
@@ -19,6 +25,26 @@ public final class MockDataStore {
         CARDS.put("CUST006", new CardDto("CARD006", "CUST006", "Fiona Kelly", "**** **** **** 6076", "MASTERCARD", "03/28", "***", new BigDecimal("7000.00"), new BigDecimal("2500.45"), "ACTIVE"));
         CARDS.put("CUST007", new CardDto("CARD007", "CUST007", "George Nolan", "**** **** **** 7087", "VISA", "12/26", "***", new BigDecimal("10000.00"), new BigDecimal("1500.00"), "BLOCKED"));
         CARDS.put("CUST008", new CardDto("CARD008", "CUST008", "Helen Ryan", "**** **** **** 8098", "MASTERCARD", "08/29", "***", new BigDecimal("5500.00"), new BigDecimal("5100.20"), "ACTIVE"));
+
+        for (Map.Entry<String, CardDto> entry : CARDS.entrySet()) {
+            CardDto card = entry.getValue();
+            List<CardTransactionDto> txs = new ArrayList<>();
+            txs.add(new CardTransactionDto(
+                    "CTX-" + entry.getKey() + "-01",
+                    entry.getKey(),
+                    card.cardId(),
+                    "PAY003",
+                    new BigDecimal("14.99"),
+                    "EUR",
+                    "INSTANT",
+                    "Streaming Subscription",
+                    "SUCCESS",
+                    null,
+                    card.availableCredit(),
+                    OffsetDateTime.now().minusDays(8)
+            ));
+            CARD_TRANSACTIONS_BY_CUSTOMER.put(entry.getKey(), new CopyOnWriteArrayList<>(txs));
+        }
     }
 
     private MockDataStore() {

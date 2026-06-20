@@ -46,6 +46,11 @@ public class GatewayController {
     public ResponseEntity<String> getCards(@PathVariable("id") String id, @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String auth) {
         return proxyService.forward(HttpMethod.GET, "http://card-service:7084/cards/" + id, auth, null);
     }
+    
+    @GetMapping("/cards/{id}/transactions")
+    public ResponseEntity<String> getCardTransactions(@PathVariable("id") String id, @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String auth) {
+        return proxyService.forward(HttpMethod.GET, "http://card-service:7084/cards/" + id + "/transactions", auth, null);
+    }
 
     @GetMapping("/payments/payees")
     public ResponseEntity<String> getPayees(@RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String auth) {

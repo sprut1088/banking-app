@@ -15,7 +15,8 @@ export default function TransactionsPage() {
     <div className="page-shell">
       <Navbar />
       <main className="content">
-        <h2>Transactions ({items.length})</h2>
+        <h2>Account Transactions ({items.length})</h2>
+        <p className="note">Card payment activity is tracked separately on the Cards page.</p>
         <table>
           <thead>
             <tr>

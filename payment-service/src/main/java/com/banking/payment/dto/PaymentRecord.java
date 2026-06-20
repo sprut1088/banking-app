@@ -11,7 +11,10 @@ public record PaymentRecord(
         BigDecimal amount,
         String reference,
         String currency,
+        String paymentRail,
+        String settlementType,
         String status,
+        String failureReason,
         OffsetDateTime timestamp
 ) {
 }

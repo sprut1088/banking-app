@@ -6,6 +6,10 @@ public record PaymentSubmitResponse(
         String paymentId,
         String status,
         OffsetDateTime timestamp,
-        String message
+        String message,
+        String paymentRail,
+        String settlementType,
+        String availableBalance,
+        String availableCredit
 ) {
 }

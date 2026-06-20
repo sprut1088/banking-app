@@ -11,6 +11,8 @@ public record PaymentSubmitRequest(
         @NotBlank String toPayeeId,
         @DecimalMin(value = "0.01") BigDecimal amount,
         @NotBlank String reference,
-        @NotBlank String currency
+        @NotBlank String currency,
+        String paymentRail,
+        String settlementType
 ) {
 }
