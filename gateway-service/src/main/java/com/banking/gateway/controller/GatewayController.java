@@ -33,17 +33,17 @@ public class GatewayController {
     }
 
     @GetMapping("/accounts/{id}")
-    public ResponseEntity<String> getAccount(@PathVariable String id, @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String auth) {
+    public ResponseEntity<String> getAccount(@PathVariable("id") String id, @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String auth) {
         return proxyService.forward(HttpMethod.GET, "http://account-service:7082/accounts/" + id, auth, null);
     }
 
     @GetMapping("/transactions/{id}")
-    public ResponseEntity<String> getTransactions(@PathVariable String id, @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String auth) {
+    public ResponseEntity<String> getTransactions(@PathVariable("id") String id, @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String auth) {
         return proxyService.forward(HttpMethod.GET, "http://transaction-service:7083/transactions/" + id, auth, null);
     }
 
     @GetMapping("/cards/{id}")
-    public ResponseEntity<String> getCards(@PathVariable String id, @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String auth) {
+    public ResponseEntity<String> getCards(@PathVariable("id") String id, @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String auth) {
         return proxyService.forward(HttpMethod.GET, "http://card-service:7084/cards/" + id, auth, null);
     }
 
@@ -53,7 +53,7 @@ public class GatewayController {
     }
 
     @GetMapping("/payments/{id}/history")
-    public ResponseEntity<String> getHistory(@PathVariable String id, @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String auth) {
+    public ResponseEntity<String> getHistory(@PathVariable("id") String id, @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String auth) {
         return proxyService.forward(HttpMethod.GET, "http://payment-service:7085/payments/" + id + "/history", auth, null);
     }
 
