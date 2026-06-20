@@ -82,7 +82,7 @@ docker compose down
 
 | Component | URL | Notes |
 |---|---|---|
-| Frontend | http://localhost:3000 | React app via Nginx |
+| Frontend | http://localhost:5174 | React app via Nginx |
 | Gateway API | http://localhost:7080 | Entry point for banking API |
 | Auth Service | http://localhost:7081/swagger-ui/index.html | OpenAPI UI |
 | Account Service | http://localhost:7082/swagger-ui/index.html | OpenAPI UI |
@@ -91,6 +91,9 @@ docker compose down
 | Payment Service | http://localhost:7085/swagger-ui/index.html | OpenAPI UI |
 | Load Control API | http://localhost:8090 | FastAPI control endpoints |
 | Load Metrics | http://localhost:8090/metrics | Prometheus format |
+| OTel Collector OTLP gRPC | http://localhost:24317 | Host-mapped collector port |
+| OTel Collector OTLP HTTP | http://localhost:24318 | Host-mapped collector port |
+| OTel Prometheus Exporter | http://localhost:28889/metrics | Collector metrics endpoint |
 
 ## Customer Credentials
 
