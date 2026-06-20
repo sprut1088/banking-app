@@ -34,7 +34,7 @@ public class PaymentController {
     }
 
     @GetMapping("/{customerId}/history")
-    public ResponseEntity<List<PaymentRecord>> getHistory(@PathVariable String customerId) {
+    public ResponseEntity<List<PaymentRecord>> getHistory(@PathVariable("customerId") String customerId) {
         return ResponseEntity.ok(paymentService.getHistory(customerId));
     }
 

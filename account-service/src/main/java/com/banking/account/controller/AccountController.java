@@ -19,7 +19,7 @@ public class AccountController {
     }
 
     @GetMapping("/{customerId}")
-    public ResponseEntity<AccountDto> getAccount(@PathVariable String customerId) {
+    public ResponseEntity<AccountDto> getAccount(@PathVariable("customerId") String customerId) {
         return ResponseEntity.ok(accountService.getAccountByCustomerId(customerId));
     }
 }

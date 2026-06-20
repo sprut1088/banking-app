@@ -19,7 +19,7 @@ public class CardController {
     }
 
     @GetMapping("/{customerId}")
-    public ResponseEntity<CardDto> getCard(@PathVariable String customerId) {
+    public ResponseEntity<CardDto> getCard(@PathVariable("customerId") String customerId) {
         return ResponseEntity.ok(cardService.getCardByCustomerId(customerId));
     }
 }

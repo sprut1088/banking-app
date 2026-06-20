@@ -21,7 +21,7 @@ public class TransactionController {
     }
 
     @GetMapping("/{customerId}")
-    public ResponseEntity<List<TransactionDto>> getTransactions(@PathVariable String customerId) {
+    public ResponseEntity<List<TransactionDto>> getTransactions(@PathVariable("customerId") String customerId) {
         return ResponseEntity.ok(transactionService.getTransactions(customerId));
     }
 }
