@@ -19,7 +19,7 @@ export default function Navbar() {
 
   return (
     <header className="nav-shell">
-      <div className="brand">Aster Bank</div>
+      <div className="brand">Demo Banking App</div>
       <nav>
         <NavLink to="/dashboard">Dashboard</NavLink>
         <NavLink to="/accounts">Account</NavLink>
