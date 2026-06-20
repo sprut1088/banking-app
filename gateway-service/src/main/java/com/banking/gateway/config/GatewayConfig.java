@@ -20,7 +20,15 @@ public class GatewayConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/api/**")
-                        .allowedOrigins("http://10.235.21.132:3000", "http://frontend:3000")
+                    .allowedOrigins(
+                        "http://10.235.21.132:5174",
+                        "http://10.235.21.132:3000",
+                        "http://localhost:5174",
+                        "http://localhost:3000",
+                        "http://127.0.0.1:5174",
+                        "http://127.0.0.1:3000",
+                        "http://frontend:3000"
+                    )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*");
             }
