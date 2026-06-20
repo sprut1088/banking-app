@@ -463,6 +463,507 @@ Update format:
 
 ---
 
+## Phase 5 - Real Banking UX and Domain Feature Depth
+
+### P5-T1 Design System Foundations
+- [ ] Task ID: P5-T1
+- Set: 5.1
+- Functional outcome: UI looks cohesive and enterprise-banking grade.
+- Technical scope:
+  - Define typography scale, spacing tokens, color semantics, and elevation rules.
+  - Implement reusable components: button, input, card, table, badge, modal, toast.
+  - Add dark/light and high-contrast variants.
+- Dependencies: none
+- Owner: UNASSIGNED
+- Status: READY
+- Started On: _
+- Closed On: _
+- Evidence: _
+- Acceptance checks:
+  - All major screens use shared components and tokens.
+  - Accessibility contrast checks pass for key views.
+
+### P5-T2 Navigation and Information Architecture Refresh
+- [ ] Task ID: P5-T2
+- Set: 5.1
+- Functional outcome: app navigation feels like a real retail banking portal.
+- Technical scope:
+  - Add sidebar/top-nav sections: Overview, Accounts, Cards, Payments, Transfers, Statements, Security, Support.
+  - Add breadcrumb and page-level context headers.
+  - Add global search entry point.
+- Dependencies: P5-T1
+- Owner: UNASSIGNED
+- Status: READY
+- Started On: _
+- Closed On: _
+- Evidence: _
+- Acceptance checks:
+  - User reaches any key workflow in <=3 clicks.
+  - Active navigation and route guards work consistently.
+
+### P5-T3 Customer Profile and KYC Snapshot
+- [ ] Task ID: P5-T3
+- Set: 5.2
+- Functional outcome: demo includes realistic customer identity context.
+- Technical scope:
+  - Add profile page with KYC level, risk band, residency, and verification status.
+  - Add editable contact preferences and communication channels.
+  - Add mock document verification timeline.
+- Dependencies: P5-T2
+- Owner: UNASSIGNED
+- Status: READY
+- Started On: _
+- Closed On: _
+- Evidence: _
+- Acceptance checks:
+  - Profile data loads from API and persists mock updates.
+  - KYC state is visible in payment and transfer eligibility decisions.
+
+### P5-T4 Account Portfolio Experience
+- [ ] Task ID: P5-T4
+- Set: 5.2
+- Functional outcome: accounts page resembles multi-product banking view.
+- Technical scope:
+  - Add account cards for current/savings/loan with balances and trend chips.
+  - Add mini balance trend chart for 7d/30d windows.
+  - Add account nicknames and favorite account pinning.
+- Dependencies: P5-T1
+- Owner: UNASSIGNED
+- Status: READY
+- Started On: _
+- Closed On: _
+- Evidence: _
+- Acceptance checks:
+  - Portfolio view supports at least 3 account types.
+  - Trends and totals stay consistent with transaction data.
+
+### P5-T5 Beneficiaries and Payees Management
+- [ ] Task ID: P5-T5
+- Set: 5.3
+- Functional outcome: users can manage trusted recipients like a real bank app.
+- Technical scope:
+  - Add beneficiary CRUD with alias, IBAN/account, bank code, country, risk flag.
+  - Add verification states: pending, verified, blocked.
+  - Add search and filter by status and country.
+- Dependencies: P5-T3
+- Owner: UNASSIGNED
+- Status: READY
+- Started On: _
+- Closed On: _
+- Evidence: _
+- Acceptance checks:
+  - Payment initiation enforces beneficiary status rules.
+  - Blocked beneficiaries are prevented with clear errors.
+
+### P5-T6 Transfer and Payment Journey Upgrade
+- [ ] Task ID: P5-T6
+- Set: 5.3
+- Functional outcome: transfer journey supports realistic rails and scheduling.
+- Technical scope:
+  - Add transfer types: own account, domestic external, international mock.
+  - Add scheduling: now, future date, recurring template.
+  - Add fee estimate and execution ETA preview.
+- Dependencies: P5-T5
+- Owner: UNASSIGNED
+- Status: READY
+- Started On: _
+- Closed On: _
+- Evidence: _
+- Acceptance checks:
+  - User can submit instant and SEPA flows with ETA/fees visible.
+  - Scheduled transfers are listed with editable/cancel states.
+
+### P5-T7 Card Management Console
+- [ ] Task ID: P5-T7
+- Set: 5.4
+- Functional outcome: card controls mirror modern digital banking apps.
+- Technical scope:
+  - Add card lock/unlock toggle and channel controls (ATM, ecommerce, POS).
+  - Add spend limit controls per day/week/month.
+  - Add virtual card create/delete mock flow.
+- Dependencies: P5-T1
+- Owner: UNASSIGNED
+- Status: READY
+- Started On: _
+- Closed On: _
+- Evidence: _
+- Acceptance checks:
+  - Card control changes affect authorization simulation paths.
+  - Audit trail captures all control updates.
+
+### P5-T8 Statements and Export Center
+- [ ] Task ID: P5-T8
+- Set: 5.4
+- Functional outcome: demo includes realistic statement workflows.
+- Technical scope:
+  - Add monthly statement listing by account/card.
+  - Add PDF/CSV export mock endpoints and UI actions.
+  - Add filters for amount, merchant, category, and status.
+- Dependencies: P5-T4
+- Owner: UNASSIGNED
+- Status: READY
+- Started On: _
+- Closed On: _
+- Evidence: _
+- Acceptance checks:
+  - Statement generation works for at least 6 months mock history.
+  - Export actions are logged for compliance demo.
+
+---
+
+## Phase 6 - Accelerator and Automation Demo Enablement
+
+### P6-T1 Demo Persona and Data Seeder
+- [ ] Task ID: P6-T1
+- Set: 6.1
+- Functional outcome: one command prepares rich demo users and events.
+- Technical scope:
+  - Seed personas: student, salaried, SME owner, high-net-worth.
+  - Seed account/card/payment histories with realistic distributions.
+  - Add deterministic seed mode for repeatable demos.
+- Dependencies: P5-T4, P5-T8
+- Owner: UNASSIGNED
+- Status: READY
+- Started On: _
+- Closed On: _
+- Evidence: _
+- Acceptance checks:
+  - Seeder can recreate identical scenario data with same seed key.
+  - Each persona has distinct behavior and KPI profile.
+
+### P6-T2 Scenario Timeline Orchestrator
+- [ ] Task ID: P6-T2
+- Set: 6.1
+- Functional outcome: presenter can run scripted business storylines end-to-end.
+- Technical scope:
+  - Define scenario DSL for timed events and expected outcomes.
+  - Add execute/pause/resume controls.
+  - Emit event timeline logs for playback.
+- Dependencies: P6-T1, P4-T2
+- Owner: UNASSIGNED
+- Status: READY
+- Started On: _
+- Closed On: _
+- Evidence: _
+- Acceptance checks:
+  - At least 5 scenarios run deterministically.
+  - Timeline replay matches expected event order.
+
+### P6-T3 Workflow Automation Hooks
+- [ ] Task ID: P6-T3
+- Set: 6.2
+- Functional outcome: app integrates with automation platforms for accelerator demos.
+- Technical scope:
+  - Add outbound webhook events for payment status, alert fire, and remediation decision.
+  - Add signed webhook payloads and retry policy.
+  - Add sample connectors for Logic Apps/Power Automate/Zapier mock.
+- Dependencies: P6-T2
+- Owner: UNASSIGNED
+- Status: READY
+- Started On: _
+- Closed On: _
+- Evidence: _
+- Acceptance checks:
+  - Webhooks deliver with signature and idempotency key.
+  - Failed deliveries retry with backoff and dead-letter logging.
+
+### P6-T4 Business Rules No-code Console
+- [ ] Task ID: P6-T4
+- Set: 6.2
+- Functional outcome: non-developer presenters can change thresholds and policies live.
+- Technical scope:
+  - Add UI for editing rule parameters (limits, review thresholds, alert sensitivity).
+  - Persist versioned rule sets with rollback.
+  - Add preview mode showing impacted transactions before apply.
+- Dependencies: P6-T3
+- Owner: UNASSIGNED
+- Status: READY
+- Started On: _
+- Closed On: _
+- Evidence: _
+- Acceptance checks:
+  - Rule changes apply without service restart.
+  - Rollback restores previous behavior in one action.
+
+### P6-T5 KPI Storyboard Dashboard
+- [ ] Task ID: P6-T5
+- Set: 6.3
+- Functional outcome: executive viewers get value narrative in one screen.
+- Technical scope:
+  - Add storyboard cards: conversion, failed payments avoided, MTTR, automation savings.
+  - Add scenario-aware annotations on KPI charts.
+  - Add before/after comparison mode.
+- Dependencies: P6-T2, P3-T5
+- Owner: UNASSIGNED
+- Status: READY
+- Started On: _
+- Closed On: _
+- Evidence: _
+- Acceptance checks:
+  - Dashboard updates live during scenario execution.
+  - Before/after metrics are attributable to specific automation steps.
+
+### P6-T6 Demo Recording and Replay Pack
+- [ ] Task ID: P6-T6
+- Set: 6.3
+- Functional outcome: pre-recorded and live demos stay consistent.
+- Technical scope:
+  - Capture event stream and UI snapshots per scenario run.
+  - Add replay mode with timeline scrubber.
+  - Export replay package for offline demo environments.
+- Dependencies: P6-T2
+- Owner: UNASSIGNED
+- Status: READY
+- Started On: _
+- Closed On: _
+- Evidence: _
+- Acceptance checks:
+  - Replay reproduces KPI and alert milestones accurately.
+  - Export package runs without internet dependency.
+
+---
+
+## Phase 7 - GenAI Banking Assistant Experience
+
+### P7-T1 Domain Knowledge Base and RAG Index
+- [ ] Task ID: P7-T1
+- Set: 7.1
+- Functional outcome: assistant answers banking/product questions grounded in app data.
+- Technical scope:
+  - Build knowledge sources: product policies, fees, runbooks, FAQ.
+  - Create chunking and metadata strategy (topic, region, policy_version).
+  - Add retrieval evaluation set with expected answers.
+- Dependencies: P5-T6, P6-T4
+- Owner: UNASSIGNED
+- Status: READY
+- Started On: _
+- Closed On: _
+- Evidence: _
+- Acceptance checks:
+  - Retrieval returns relevant chunks for top 25 demo queries.
+  - Hallucination rate is measured and below agreed threshold.
+
+### P7-T2 Conversational Banking Copilot UI
+- [ ] Task ID: P7-T2
+- Set: 7.1
+- Functional outcome: user can ask natural-language questions in-app.
+- Technical scope:
+  - Add assistant panel with citations and follow-up suggestions.
+  - Support intents: explain charge, summarize spend, next best action.
+  - Add session context memory toggle.
+- Dependencies: P7-T1
+- Owner: UNASSIGNED
+- Status: READY
+- Started On: _
+- Closed On: _
+- Evidence: _
+- Acceptance checks:
+  - Responses include source citations and confidence bands.
+  - UX works on desktop and tablet layouts.
+
+### P7-T3 Natural-language to Query Translator
+- [ ] Task ID: P7-T3
+- Set: 7.2
+- Functional outcome: business users can query transactions without SQL/SPL skills.
+- Technical scope:
+  - Translate NL intents to safe query templates.
+  - Add query guardrails and allowlisted fields.
+  - Render generated query and result explanation.
+- Dependencies: P7-T1
+- Owner: UNASSIGNED
+- Status: READY
+- Started On: _
+- Closed On: _
+- Evidence: _
+- Acceptance checks:
+  - Top 20 analytics prompts produce valid queries.
+  - Unsafe/unbounded prompts are blocked with guidance.
+
+### P7-T4 AI-assisted Ops Summary Generator
+- [ ] Task ID: P7-T4
+- Set: 7.2
+- Functional outcome: generated incident and daily summaries reduce manual effort.
+- Technical scope:
+  - Generate daily payment health and alert summary from logs/metrics.
+  - Add incident timeline synthesis from trace-linked events.
+  - Include human-editable output before publish.
+- Dependencies: P1-T5, P6-T5
+- Owner: UNASSIGNED
+- Status: READY
+- Started On: _
+- Closed On: _
+- Evidence: _
+- Acceptance checks:
+  - Summary includes accurate counts and root-cause hints.
+  - Operators can edit and export summary artifacts.
+
+### P7-T5 Prompt Safety, Policy and Redaction Layer
+- [ ] Task ID: P7-T5
+- Set: 7.3
+- Functional outcome: assistant is safe for enterprise demo environments.
+- Technical scope:
+  - Add PII/PCI redaction before prompt and response rendering.
+  - Add prohibited-intent guardrails and response policies.
+  - Add prompt/response audit logs with retention settings.
+- Dependencies: P7-T2
+- Owner: UNASSIGNED
+- Status: READY
+- Started On: _
+- Closed On: _
+- Evidence: _
+- Acceptance checks:
+  - Sensitive fields are masked in logs and UI.
+  - Policy violations are blocked with deterministic messaging.
+
+### P7-T6 Model Evaluation Harness for Demos
+- [ ] Task ID: P7-T6
+- Set: 7.3
+- Functional outcome: assistant quality can be demonstrated with measurable scores.
+- Technical scope:
+  - Add offline eval suite: groundedness, relevance, actionability, latency.
+  - Add scenario-specific golden answers.
+  - Track version-over-version quality trend.
+- Dependencies: P7-T1, P7-T5
+- Owner: UNASSIGNED
+- Status: READY
+- Started On: _
+- Closed On: _
+- Evidence: _
+- Acceptance checks:
+  - Eval report generated in one command.
+  - Regressions fail threshold gate.
+
+---
+
+## Phase 8 - Agentic AI Control Plane and Human Oversight
+
+### P8-T1 Agent Goal Planner Service
+- [ ] Task ID: P8-T1
+- Set: 8.1
+- Functional outcome: complex support goals are decomposed into safe sub-tasks.
+- Technical scope:
+  - Define planner input/output contract.
+  - Implement plan decomposition with step dependencies.
+  - Add max-step and max-cost constraints.
+- Dependencies: P3-T2, P7-T5
+- Owner: UNASSIGNED
+- Status: READY
+- Started On: _
+- Closed On: _
+- Evidence: _
+- Acceptance checks:
+  - Planner emits deterministic plans for known scenarios.
+  - Constraint violations halt execution safely.
+
+### P8-T2 Agent Executor with Tool Permissioning
+- [ ] Task ID: P8-T2
+- Set: 8.1
+- Functional outcome: agents can execute approved actions under strict controls.
+- Technical scope:
+  - Add permission matrix by role, tool, and environment.
+  - Add action sandbox and dry-run mode.
+  - Add signed execution records.
+- Dependencies: P8-T1, P3-T4
+- Owner: UNASSIGNED
+- Status: READY
+- Started On: _
+- Closed On: _
+- Evidence: _
+- Acceptance checks:
+  - Unauthorized tool calls are denied and audited.
+  - Dry-run produces expected diff/output preview.
+
+### P8-T3 Human-in-the-loop Approval Workbench
+- [ ] Task ID: P8-T3
+- Set: 8.2
+- Functional outcome: high-risk actions require explicit reviewer approval.
+- Technical scope:
+  - Add approval queue UI with risk score and rationale.
+  - Add approve/reject/escalate actions with SLA timers.
+  - Add dual-control option for critical operations.
+- Dependencies: P8-T2
+- Owner: UNASSIGNED
+- Status: READY
+- Started On: _
+- Closed On: _
+- Evidence: _
+- Acceptance checks:
+  - Critical actions cannot execute without required approvals.
+  - Approval history is immutable and searchable.
+
+### P8-T4 Multi-agent Collaboration Simulator
+- [ ] Task ID: P8-T4
+- Set: 8.2
+- Functional outcome: demos can showcase coordinator/specialist agent patterns.
+- Technical scope:
+  - Add coordinator and specialist roles (fraud analyst, payments ops, SRE assistant).
+  - Add shared memory envelope and conflict resolution rules.
+  - Add collaboration trace visualization.
+- Dependencies: P8-T1
+- Owner: UNASSIGNED
+- Status: READY
+- Started On: _
+- Closed On: _
+- Evidence: _
+- Acceptance checks:
+  - At least 3 multi-agent scenarios execute end-to-end.
+  - Collaboration trace shows role handoffs and decisions.
+
+### P8-T5 Agent Governance and Compliance Pack
+- [ ] Task ID: P8-T5
+- Set: 8.3
+- Functional outcome: agent operations meet enterprise governance expectations.
+- Technical scope:
+  - Add policy checks for data residency, access scope, and action categories.
+  - Add monthly governance report export.
+  - Add controls mapping to common compliance frameworks.
+- Dependencies: P8-T3
+- Owner: UNASSIGNED
+- Status: READY
+- Started On: _
+- Closed On: _
+- Evidence: _
+- Acceptance checks:
+  - Governance report includes policy breaches and remediations.
+  - Controls mapping is available for proposal documents.
+
+### P8-T6 Agent Failure Injection and Recovery Suite
+- [ ] Task ID: P8-T6
+- Set: 8.3
+- Functional outcome: resilience of agentic workflows can be demonstrated live.
+- Technical scope:
+  - Inject failures: tool timeout, malformed output, dependency outage, policy denial.
+  - Add automatic fallback strategies and retry policies.
+  - Measure recovery KPIs (time to safe state, task completion rate).
+- Dependencies: P8-T2, P8-T4
+- Owner: UNASSIGNED
+- Status: READY
+- Started On: _
+- Closed On: _
+- Evidence: _
+- Acceptance checks:
+  - Failure scenarios recover to safe state without data corruption.
+  - Recovery KPIs are visible in dashboards and logs.
+
+---
+
+## Expansion Sprint Slice (Recommended)
+
+Start with these 10 tasks to maximize demo impact quickly:
+
+- [ ] P5-T1 Design System Foundations
+- [ ] P5-T2 Navigation and Information Architecture Refresh
+- [ ] P5-T4 Account Portfolio Experience
+- [ ] P5-T6 Transfer and Payment Journey Upgrade
+- [ ] P6-T1 Demo Persona and Data Seeder
+- [ ] P6-T2 Scenario Timeline Orchestrator
+- [ ] P6-T3 Workflow Automation Hooks
+- [ ] P7-T1 Domain Knowledge Base and RAG Index
+- [ ] P7-T2 Conversational Banking Copilot UI
+- [ ] P8-T3 Human-in-the-loop Approval Workbench
+
+---
+
 ## Current Sprint Slice (Recommended)
 
 Start with these 6 tasks for highest value and lowest risk:
