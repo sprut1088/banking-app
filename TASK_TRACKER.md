@@ -529,10 +529,10 @@ Update format:
   - Add account nicknames and favorite account pinning.
 - Dependencies: P5-T1
 - Owner: UNASSIGNED
-- Status: READY
-- Started On: _
+- Status: IN_REVIEW
+- Started On: 2026-06-20
 - Closed On: _
-- Evidence: _
+- Evidence: Added account portfolio layer with CURRENT/SAVINGS/LOAN cards, 7D/30D mini balance trend charts with trend chips, and persisted account nickname/favorite pinning using local portfolio preferences.
 - Acceptance checks:
   - Portfolio view supports at least 3 account types.
   - Trends and totals stay consistent with transaction data.

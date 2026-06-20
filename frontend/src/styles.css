@@ -719,6 +719,101 @@ tr.credit td {
   padding: var(--space-4);
 }
 
+.portfolio-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-3);
+}
+
+.window-switch {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.portfolio-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.portfolio-card-item {
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  background: linear-gradient(170deg, #f7fbff, var(--surface-card));
+  color: var(--text-primary);
+}
+
+.portfolio-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-2);
+}
+
+.pin-btn {
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border-default);
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.pin-btn:hover {
+  background: #edf3ff;
+}
+
+.pin-btn.pinned {
+  color: #154e36;
+  border-color: #7ed8ac;
+  background: #dff8eb;
+}
+
+.portfolio-balance {
+  font-family: var(--font-heading);
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 8px 0;
+}
+
+.portfolio-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-2);
+}
+
+.trend-chip {
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-weight: 700;
+}
+
+.trend-chip.up {
+  background: #dff8eb;
+  color: #0d6a3b;
+}
+
+.trend-chip.down {
+  background: #ffe5e5;
+  color: #8a1a1a;
+}
+
+.trend-chip.flat {
+  background: #eef2f9;
+  color: #38517d;
+}
+
+.mini-chart {
+  width: 100%;
+  height: 56px;
+  color: #2f4e89;
+  opacity: 0.88;
+}
+
 .timeline-list {
   list-style: none;
   padding: 0;
@@ -781,6 +876,10 @@ tr.credit td {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .portfolio-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .load-grid {
     grid-template-columns: 1fr;
   }
@@ -816,6 +915,16 @@ tr.credit td {
 
   .pref-grid {
     grid-template-columns: 1fr;
+  }
+
+  .portfolio-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .portfolio-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
   }
 
   .ui-toast-stack {
