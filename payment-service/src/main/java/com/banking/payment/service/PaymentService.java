@@ -18,6 +18,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.OffsetDateTime;
+import java.util.Locale;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,16 +31,19 @@ public class PaymentService {
     private static final BigDecimal SEPA_REVIEW_THRESHOLD = new BigDecimal("2000.00");
 
     private final RestTemplate restTemplate;
+    private final PaymentMetricsRecorder paymentMetricsRecorder;
     private final String accountServiceBaseUrl;
     private final String transactionServiceBaseUrl;
     private final String cardServiceBaseUrl;
 
     public PaymentService(
             RestTemplate restTemplate,
+            PaymentMetricsRecorder paymentMetricsRecorder,
             @Value("${integration.accountServiceBaseUrl:http://account-service:7082}") String accountServiceBaseUrl,
             @Value("${integration.transactionServiceBaseUrl:http://transaction-service:7083}") String transactionServiceBaseUrl,
             @Value("${integration.cardServiceBaseUrl:http://card-service:7084}") String cardServiceBaseUrl) {
         this.restTemplate = restTemplate;
+        this.paymentMetricsRecorder = paymentMetricsRecorder;
         this.accountServiceBaseUrl = accountServiceBaseUrl;
         this.transactionServiceBaseUrl = transactionServiceBaseUrl;
         this.cardServiceBaseUrl = cardServiceBaseUrl;
@@ -59,48 +63,86 @@ public class PaymentService {
     }
 
     public PaymentSubmitResponse submitPayment(PaymentSubmitRequest request) {
+        long processingStartNs = System.nanoTime();
+        String paymentRail = "unknown";
+        String settlementType = "unknown";
+        String processingFailureReason = "none";
+
         if (request.amount() == null || request.amount().compareTo(BigDecimal.ZERO) <= 0) {
+            processingFailureReason = "invalid_amount";
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Amount must be greater than 0");
         }
         if (!MockDataStore.CUSTOMERS.contains(request.customerId())) {
+            processingFailureReason = "unknown_customer";
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown customerId");
         }
         if (!MockDataStore.PAYEES.containsKey(request.toPayeeId())) {
+            processingFailureReason = "unknown_payee";
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown payeeId");
         }
 
-        BigDecimal amount = request.amount().setScale(2, RoundingMode.HALF_UP);
-        if (!"EUR".equalsIgnoreCase(request.currency())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only EUR currency is supported for demo flows");
-        }
+        try {
+            BigDecimal amount = request.amount().setScale(2, RoundingMode.HALF_UP);
+            if (!"EUR".equalsIgnoreCase(request.currency())) {
+                processingFailureReason = "unsupported_currency";
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only EUR currency is supported for demo flows");
+            }
 
-        String paymentRail = normalizePaymentRail(request.paymentRail());
-        String settlementType = normalizeSettlementType(request.settlementType());
+            paymentRail = normalizePaymentRail(request.paymentRail());
+            settlementType = normalizeSettlementType(request.settlementType());
+            paymentMetricsRecorder.incrementSubmission(paymentRail, settlementType, "none");
 
-        String paymentId = "PMT-" + UUID.randomUUID();
-        OffsetDateTime now = OffsetDateTime.now();
+            String paymentId = "PMT-" + UUID.randomUUID();
+            OffsetDateTime now = OffsetDateTime.now();
 
-        String failedReason = runPreChecks(request, amount, paymentRail, settlementType);
-        if (failedReason != null) {
-            LOGGER.warn("Payment rejected paymentId={} customerId={} rail={} settlement={} reason={}",
-                    paymentId, request.customerId(), paymentRail, settlementType, failedReason);
-            recordPayment(request, paymentId, now, paymentRail, settlementType, "FAILED", failedReason, amount);
-            return new PaymentSubmitResponse(
-                    paymentId,
-                    "FAILED",
-                    now,
-                    failedReason,
+            String failedReason = runPreChecks(request, amount, paymentRail, settlementType);
+            if (failedReason != null) {
+                processingFailureReason = failedReason;
+                LOGGER.warn("Payment rejected paymentId={} customerId={} rail={} settlement={} reason={}",
+                        paymentId, request.customerId(), paymentRail, settlementType, failedReason);
+                recordPayment(request, paymentId, now, paymentRail, settlementType, "FAILED", failedReason, amount);
+                paymentMetricsRecorder.incrementFailure(paymentRail, settlementType, normalizeMetricReason(failedReason));
+                return new PaymentSubmitResponse(
+                        paymentId,
+                        "FAILED",
+                        now,
+                        failedReason,
+                        paymentRail,
+                        settlementType,
+                        null,
+                        null
+                );
+            }
+
+            PaymentSubmitResponse response;
+            if ("ACCOUNT".equals(paymentRail)) {
+                response = processAccountPayment(request, paymentId, now, settlementType, amount);
+            } else {
+                response = processCardPayment(request, paymentId, now, settlementType, amount);
+            }
+
+            if ("SUCCESS".equalsIgnoreCase(response.status())) {
+                processingFailureReason = "none";
+                paymentMetricsRecorder.incrementSuccess(paymentRail, settlementType);
+            } else {
+                processingFailureReason = response.message();
+                paymentMetricsRecorder.incrementFailure(paymentRail, settlementType, normalizeMetricReason(response.message()));
+            }
+            return response;
+        } catch (ResponseStatusException ex) {
+            if (!"unknown".equals(paymentRail)) {
+                paymentMetricsRecorder.incrementFailure(paymentRail, settlementType, normalizeMetricReason(ex.getReason()));
+            }
+            throw ex;
+        } finally {
+            double durationMs = (System.nanoTime() - processingStartNs) / 1_000_000.0;
+            paymentMetricsRecorder.recordPaymentProcessingDuration(
                     paymentRail,
                     settlementType,
-                    null,
-                    null
+                    normalizeMetricReason(processingFailureReason),
+                    durationMs
             );
         }
-
-        if ("ACCOUNT".equals(paymentRail)) {
-            return processAccountPayment(request, paymentId, now, settlementType, amount);
-        }
-        return processCardPayment(request, paymentId, now, settlementType, amount);
     }
 
     private PaymentSubmitResponse processAccountPayment(PaymentSubmitRequest request,
@@ -116,15 +158,30 @@ public class PaymentService {
         accountUpdatePayload.put("reference", paymentId);
 
         BigDecimal newBalance;
+        long accountCallStartNs = System.nanoTime();
         try {
             ResponseEntity<Map> accountResponse = restTemplate.postForEntity(
                     accountServiceBaseUrl + "/accounts/" + request.customerId() + "/balance-adjustments",
                     accountUpdatePayload,
                     Map.class
             );
+            paymentMetricsRecorder.recordDownstreamCallDuration(
+                    "account-service",
+                    "ACCOUNT",
+                    settlementType,
+                    "none",
+                    (System.nanoTime() - accountCallStartNs) / 1_000_000.0
+            );
             newBalance = asBigDecimal(accountResponse.getBody() != null ? accountResponse.getBody().get("balance") : null);
         } catch (HttpStatusCodeException ex) {
             String reason = extractErrorMessage(ex, "Account debit failed");
+            paymentMetricsRecorder.recordDownstreamCallDuration(
+                    "account-service",
+                    "ACCOUNT",
+                    settlementType,
+                    normalizeMetricReason(reason),
+                    (System.nanoTime() - accountCallStartNs) / 1_000_000.0
+            );
             LOGGER.warn("Account payment failed paymentId={} customerId={} reason={} status={}",
                     paymentId, request.customerId(), reason, ex.getStatusCode().value());
             recordPayment(request, paymentId, now, "ACCOUNT", settlementType, "FAILED", reason, amount);
@@ -139,11 +196,26 @@ public class PaymentService {
         transactionPayload.put("balanceAfter", newBalance);
         transactionPayload.put("reference", request.reference());
 
+        long transactionCallStartNs = System.nanoTime();
         try {
             restTemplate.postForEntity(transactionServiceBaseUrl + "/transactions", transactionPayload, Map.class);
+            paymentMetricsRecorder.recordDownstreamCallDuration(
+                    "transaction-service",
+                    "ACCOUNT",
+                    settlementType,
+                    "none",
+                    (System.nanoTime() - transactionCallStartNs) / 1_000_000.0
+            );
         } catch (HttpStatusCodeException ex) {
             String reason = extractErrorMessage(ex, "Transaction ledger update failed");
-            rollbackAccountDebit(request.customerId(), amount, paymentId);
+            paymentMetricsRecorder.recordDownstreamCallDuration(
+                    "transaction-service",
+                    "ACCOUNT",
+                    settlementType,
+                    normalizeMetricReason(reason),
+                    (System.nanoTime() - transactionCallStartNs) / 1_000_000.0
+            );
+            rollbackAccountDebit(request.customerId(), amount, paymentId, settlementType, reason);
             LOGGER.error("Payment rollback executed paymentId={} customerId={} reason={}", paymentId, request.customerId(), reason);
             recordPayment(request, paymentId, now, "ACCOUNT", settlementType, "FAILED", reason, amount);
             return new PaymentSubmitResponse(paymentId, "FAILED", now, reason, "ACCOUNT", settlementType, null, null);
@@ -174,16 +246,31 @@ public class PaymentService {
         cardChargePayload.put("settlementType", settlementType);
 
         BigDecimal availableCreditAfter;
+        long cardCallStartNs = System.nanoTime();
         try {
             ResponseEntity<Map> cardChargeResponse = restTemplate.postForEntity(
                     cardServiceBaseUrl + "/cards/" + request.customerId() + "/transactions/charge",
                     cardChargePayload,
                     Map.class
             );
+            paymentMetricsRecorder.recordDownstreamCallDuration(
+                "card-service",
+                "CARD",
+                settlementType,
+                "none",
+                (System.nanoTime() - cardCallStartNs) / 1_000_000.0
+            );
             availableCreditAfter = asBigDecimal(cardChargeResponse.getBody() != null
                     ? cardChargeResponse.getBody().get("availableCreditAfter") : null);
         } catch (HttpStatusCodeException ex) {
             String reason = extractErrorMessage(ex, "Card charge failed");
+            paymentMetricsRecorder.recordDownstreamCallDuration(
+                "card-service",
+                "CARD",
+                settlementType,
+                normalizeMetricReason(reason),
+                (System.nanoTime() - cardCallStartNs) / 1_000_000.0
+            );
             LOGGER.warn("Card payment failed paymentId={} customerId={} reason={} status={}",
                     paymentId, request.customerId(), reason, ex.getStatusCode().value());
             recordPayment(request, paymentId, now, "CARD", settlementType, "FAILED", reason, amount);
@@ -216,20 +303,41 @@ public class PaymentService {
         return null;
     }
 
-    private void rollbackAccountDebit(String customerId, BigDecimal amount, String paymentId) {
+    private void rollbackAccountDebit(String customerId,
+                                      BigDecimal amount,
+                                      String paymentId,
+                                      String settlementType,
+                                      String failureReason) {
         Map<String, Object> rollbackPayload = new HashMap<>();
         rollbackPayload.put("customerId", customerId);
         rollbackPayload.put("amount", amount);
         rollbackPayload.put("direction", "CREDIT");
         rollbackPayload.put("reason", "ROLLBACK_PAYMENT");
         rollbackPayload.put("reference", paymentId + "-RB");
+        paymentMetricsRecorder.incrementRepairAttempt("ACCOUNT", settlementType, normalizeMetricReason(failureReason));
+
+        long rollbackStartNs = System.nanoTime();
         try {
             restTemplate.postForEntity(
                     accountServiceBaseUrl + "/accounts/" + customerId + "/balance-adjustments",
                     rollbackPayload,
                     Map.class
             );
+            paymentMetricsRecorder.recordDownstreamCallDuration(
+                    "account-service",
+                    "ACCOUNT",
+                    settlementType,
+                    "rollback_success",
+                    (System.nanoTime() - rollbackStartNs) / 1_000_000.0
+            );
         } catch (Exception ex) {
+            paymentMetricsRecorder.recordDownstreamCallDuration(
+                    "account-service",
+                    "ACCOUNT",
+                    settlementType,
+                    "rollback_failed",
+                    (System.nanoTime() - rollbackStartNs) / 1_000_000.0
+            );
             LOGGER.error("Rollback failed paymentId={} customerId={} error={}", paymentId, customerId, ex.getMessage());
         }
     }
@@ -304,5 +412,12 @@ public class PaymentService {
             return body;
         }
         return fallback;
+    }
+
+    private String normalizeMetricReason(String reason) {
+        if (reason == null || reason.isBlank()) {
+            return "none";
+        }
+        return reason.toLowerCase(Locale.ROOT);
     }
 }

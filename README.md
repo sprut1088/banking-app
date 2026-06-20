@@ -115,6 +115,18 @@ docker compose down
 - Jaeger UI: http://localhost:16686
 - Splunk UI: http://localhost:8000 (admin/admin123)
 
+## Splunk Validation And Alert Assets
+
+- Ingestion validation runbook: [SPLUNK_VALIDATION.md](SPLUNK_VALIDATION.md)
+- Alert starter runbook: [SPLUNK_ALERT_RUNBOOK.md](SPLUNK_ALERT_RUNBOOK.md)
+- Splunk saved-search template: [splunk/savedsearches.p1-t5.conf.template](splunk/savedsearches.p1-t5.conf.template)
+
+Quick validation command:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\validate-p1-t4.ps1
+```
+
 ## Load Generator Endpoints
 
 - Health: `GET /health`

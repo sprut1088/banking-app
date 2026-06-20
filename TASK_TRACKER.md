@@ -81,10 +81,10 @@ Update format:
   - Add labels: payment_rail, settlement_type, failure_reason, service_name.
 - Dependencies: P1-T1
 - Owner: UNASSIGNED
-- Status: READY
-- Started On: _
+- Status: IN_REVIEW
+- Started On: 2026-06-20
 - Closed On: _
-- Evidence: _
+- Evidence: Added PaymentMetricsRecorder with counters and histograms; instrumented payment submission/success/failure/repair and downstream/account/card/transaction call latencies in PaymentService.
 - Acceptance checks:
   - Metrics visible in /actuator/prometheus (or collector export endpoint).
   - Success/failure scenarios increment expected series.
@@ -99,10 +99,10 @@ Update format:
   - Document ingestion assumptions and local test commands.
 - Dependencies: P1-T1
 - Owner: UNASSIGNED
-- Status: READY
-- Started On: _
+- Status: IN_REVIEW
+- Started On: 2026-06-20
 - Closed On: _
-- Evidence: _
+- Evidence: Added `SPLUNK_VALIDATION.md` runbook and `scripts/validate-p1-t4.ps1` static validator for existing hardcoded splunk_hec mapping and logs pipeline checks.
 - Acceptance checks:
   - Query by error_code and payment_id returns events.
   - At least one full transaction journey visible in Splunk.
@@ -117,10 +117,10 @@ Update format:
   - Add runbook references to each alert.
 - Dependencies: P1-T3, P1-T4
 - Owner: UNASSIGNED
-- Status: READY
-- Started On: _
+- Status: IN_REVIEW
+- Started On: 2026-06-20
 - Closed On: _
-- Evidence: _
+- Evidence: Added `splunk/savedsearches.p1-t5.conf.template` with 3 alert searches, thresholds and windows; added `SPLUNK_ALERT_RUNBOOK.md` with trigger scripts, payload fields and response runbooks.
 - Acceptance checks:
   - All 3 alerts trigger using scripted failure scenarios.
   - Alert payload includes service and error_code context.

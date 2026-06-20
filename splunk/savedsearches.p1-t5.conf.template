@@ -1,0 +1,35 @@
+# Splunk savedsearches template for P1-T5 alert starter rules.
+# Import manually into Splunk or transpose into UI saved searches.
+
+[Banking - Payment Failure Spike]
+search = index=banking source="banking-app" sourcetype="java-otel" (message="*Payment*FAILED*" OR error_code=*) | bin _time span=5m | stats count as failures by _time | where failures >= 3
+cron_schedule = */2 * * * *
+dispatch.earliest_time = -10m
+alert_type = always
+alert_comparator = greater than
+alert_threshold = 0
+alert.suppress = 0
+action.email = 0
+description = Triggers when payment failures spike in a 5-minute window. Runbook: SPLUNK_ALERT_RUNBOOK.md#alert-1-payment-failure-spike
+
+[Banking - Card Rejection Burst]
+search = index=banking source="banking-app" sourcetype="java-otel" (message="*Card payment failed*" OR message="*Card charge rejected*" OR error_code=PMT-003) | bin _time span=5m | stats count as card_rejections values(payment_id) as payment_ids by _time | where card_rejections >= 2
+cron_schedule = */2 * * * *
+dispatch.earliest_time = -10m
+alert_type = always
+alert_comparator = greater than
+alert_threshold = 0
+alert.suppress = 0
+action.email = 0
+description = Triggers on concentrated card rejection patterns that indicate card control or credit issues. Runbook: SPLUNK_ALERT_RUNBOOK.md#alert-2-card-rejection-burst
+
+[Banking - Rollback Execution Event]
+search = index=banking source="banking-app" sourcetype="java-otel" message="*Payment rollback executed*" | bin _time span=15m | stats count as rollback_count values(payment_id) as payment_ids by _time | where rollback_count >= 1
+cron_schedule = */5 * * * *
+dispatch.earliest_time = -30m
+alert_type = always
+alert_comparator = greater than
+alert_threshold = 0
+alert.suppress = 0
+action.email = 0
+description = Triggers whenever payment rollback logic executes. Runbook: SPLUNK_ALERT_RUNBOOK.md#alert-3-rollback-execution-event
