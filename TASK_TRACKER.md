@@ -63,10 +63,10 @@ Update format:
   - Add fallback correlation ID generation for non-traced calls.
 - Dependencies: P1-T1
 - Owner: UNASSIGNED
-- Status: READY
-- Started On: _
+- Status: IN_REVIEW
+- Started On: 2026-06-20
 - Closed On: _
-- Evidence: _
+- Evidence: Added CorrelationMdcFilter to all Spring services, propagated trace and correlation headers in gateway proxy and payment downstream RestTemplate interceptor.
 - Acceptance checks:
   - Single payment path shows same trace_id in all services.
   - Missing-header requests still carry generated correlation id.
