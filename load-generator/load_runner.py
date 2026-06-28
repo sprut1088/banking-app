@@ -12,9 +12,10 @@ from metrics_store import MetricsStore
 
 logger = logging.getLogger(__name__)
 
-GATEWAY_URL = os.getenv("GATEWAY_URL", "http://gateway-service:7080")
-TPS_PER_FLOW = float(os.getenv("TPS_PER_FLOW", "3"))
-SLEEP_SECONDS = max(0.01, 1.0 / TPS_PER_FLOW)
+GATEWAY_URL = os.getenv("GATEWAY_URL", "http://localhost:7080")
+TOTAL_TPS_MIN = float(os.getenv("TOTAL_TPS_MIN", "2"))
+TOTAL_TPS_MAX = float(os.getenv("TOTAL_TPS_MAX", "3"))
+SCREEN_FLOW_COUNT = float(os.getenv("SCREEN_FLOW_COUNT", "5"))
 
 CUSTOMER_CREDENTIALS = {
     "CUST001": ("alice", "pass123"),
@@ -28,6 +29,12 @@ CUSTOMER_CREDENTIALS = {
 }
 CUSTOMERS = list(CUSTOMER_CREDENTIALS.keys())
 PAYEES = ["PAY001", "PAY002", "PAY003", "PAY004", "PAY005"]
+
+
+def _next_sleep_seconds():
+    total_tps = random.uniform(min(TOTAL_TPS_MIN, TOTAL_TPS_MAX), max(TOTAL_TPS_MIN, TOTAL_TPS_MAX))
+    per_flow_tps = max(0.05, total_tps / max(1.0, SCREEN_FLOW_COUNT))
+    return max(0.01, 1.0 / per_flow_tps)
 
 
 def _basic_auth(customer_id):
@@ -52,7 +59,7 @@ async def run_login_flow(store: MetricsStore, stop_event: asyncio.Event):
             finally:
                 await store.record_login(username, ok, (time.perf_counter() - start) * 1000)
             idx += 1
-            await asyncio.sleep(SLEEP_SECONDS)
+            await asyncio.sleep(_next_sleep_seconds())
 
 
 async def run_account_flow(store: MetricsStore, stop_event: asyncio.Event):
@@ -70,7 +77,7 @@ async def run_account_flow(store: MetricsStore, stop_event: asyncio.Event):
             except Exception as exc:
                 logger.warning("ACCOUNT_FLOW request failed: %s", exc)
             idx += 1
-            await asyncio.sleep(SLEEP_SECONDS)
+            await asyncio.sleep(_next_sleep_seconds())
 
 
 async def run_transaction_flow(store: MetricsStore, stop_event: asyncio.Event):
@@ -88,7 +95,7 @@ async def run_transaction_flow(store: MetricsStore, stop_event: asyncio.Event):
             except Exception as exc:
                 logger.warning("TRANSACTION_FLOW request failed: %s", exc)
             idx += 1
-            await asyncio.sleep(SLEEP_SECONDS)
+            await asyncio.sleep(_next_sleep_seconds())
 
 
 async def run_card_flow(store: MetricsStore, stop_event: asyncio.Event):
@@ -106,7 +113,7 @@ async def run_card_flow(store: MetricsStore, stop_event: asyncio.Event):
             except Exception as exc:
                 logger.warning("CARD_FLOW request failed: %s", exc)
             idx += 1
-            await asyncio.sleep(SLEEP_SECONDS)
+            await asyncio.sleep(_next_sleep_seconds())
 
 
 async def run_payment_flow(store: MetricsStore, stop_event: asyncio.Event):
@@ -142,4 +149,4 @@ async def run_payment_flow(store: MetricsStore, stop_event: asyncio.Event):
                 await store.record_payment(ok, (time.perf_counter() - start) * 1000)
             idx += 1
             payee_idx += 1
-            await asyncio.sleep(SLEEP_SECONDS)
+            await asyncio.sleep(_next_sleep_seconds())

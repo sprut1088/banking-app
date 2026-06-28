@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import os
 from contextlib import suppress
 from typing import Dict, List
 
@@ -24,7 +25,14 @@ logger = logging.getLogger(__name__)
 app = FastAPI(title="Banking Load Generator", version="1.0.0")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://10.235.21.132:3000", "http://frontend:3000"],
+    allow_origins=[
+        "http://10.235.21.132:3000",
+        "http://frontend:3000",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:5174",
+        "http://127.0.0.1:5174",
+    ],
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -41,6 +49,8 @@ FLOW_RUNNERS = {
     "PAYMENT_FLOW": run_payment_flow,
 }
 
+AUTO_START_FLOWS = os.getenv("AUTO_START_FLOWS", "true").strip().lower() in {"1", "true", "yes", "y", "on"}
+
 
 class FlowRequest(BaseModel):
     flows: List[str] = Field(default_factory=list)
@@ -53,6 +63,38 @@ def _normalize_flows(requested: List[str]) -> List[str]:
     if invalid:
         raise HTTPException(status_code=400, detail=f"Invalid flows: {', '.join(invalid)}")
     return requested
+
+
+async def _start_requested_flows(requested: List[str]) -> List[str]:
+    started = []
+    for flow in requested:
+        if flow in flow_tasks and not flow_tasks[flow].done():
+            continue
+        stop_event = asyncio.Event()
+        flow_stop_events[flow] = stop_event
+        task = asyncio.create_task(FLOW_RUNNERS[flow](store, stop_event), name=flow)
+        flow_tasks[flow] = task
+        await store.set_flow_active(flow, True)
+        started.append(flow)
+    return started
+
+
+@app.on_event("startup")
+async def startup_event():
+    if not AUTO_START_FLOWS:
+        logger.info("AUTO_START_FLOWS disabled, waiting for /load/start")
+        return
+
+    started = await _start_requested_flows(list(FLOW_RUNNERS.keys()))
+    if started:
+        logger.info("Auto-started flows: %s", ", ".join(started))
+    else:
+        logger.info("All flows were already running on startup")
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    await stop_all_flows()
 
 
 @app.get("/health")
@@ -72,16 +114,7 @@ async def start_flows(req: FlowRequest):
     if not requested:
         requested = list(FLOW_RUNNERS.keys())
 
-    started = []
-    for flow in requested:
-        if flow in flow_tasks and not flow_tasks[flow].done():
-            continue
-        stop_event = asyncio.Event()
-        flow_stop_events[flow] = stop_event
-        task = asyncio.create_task(FLOW_RUNNERS[flow](store, stop_event), name=flow)
-        flow_tasks[flow] = task
-        await store.set_flow_active(flow, True)
-        started.append(flow)
+    started = await _start_requested_flows(requested)
 
     if not started:
         raise HTTPException(status_code=409, detail="Requested flows are already running")
