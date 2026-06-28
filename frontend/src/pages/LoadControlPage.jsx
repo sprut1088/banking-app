@@ -2,16 +2,33 @@ import { useEffect, useMemo, useState } from 'react';
 import Navbar from '../components/Navbar';
 
 const FLOW_NAMES = ['LOGIN_FLOW', 'PAYMENT_FLOW', 'CARD_FLOW', 'ACCOUNT_FLOW', 'TRANSACTION_FLOW'];
-const LOAD_API = 'http://10.235.21.132:8090';
+const LOAD_API = import.meta.env.VITE_LOAD_API_URL || 'http://localhost:8090';
 
 export default function LoadControlPage() {
   const [status, setStatus] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [configBusy, setConfigBusy] = useState(false);
+  const [configDirty, setConfigDirty] = useState(false);
+  const [tpsMin, setTpsMin] = useState('2');
+  const [tpsMax, setTpsMax] = useState('3');
+  const [feedback, setFeedback] = useState('');
+
+  const fetchJson = async (path, init) => {
+    const response = await fetch(`${LOAD_API}${path}`, init);
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(data?.detail || data?.message || `Request failed (${response.status})`);
+    }
+    return data;
+  };
 
   const refreshStatus = async () => {
-    const response = await fetch(`${LOAD_API}/load/status`);
-    const data = await response.json();
+    const data = await fetchJson('/load/status');
     setStatus(data);
+    if (!configDirty) {
+      setTpsMin(String(data?.target_total_tps_min ?? 2));
+      setTpsMax(String(data?.target_total_tps_max ?? 3));
+    }
   };
 
   useEffect(() => {
@@ -22,15 +39,48 @@ export default function LoadControlPage() {
 
   const postJson = async (path, body) => {
     setBusy(true);
+    setFeedback('');
     try {
-      await fetch(`${LOAD_API}${path}`, {
+      await fetchJson(path, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: body ? JSON.stringify(body) : undefined
       });
       await refreshStatus();
+    } catch (error) {
+      setFeedback(error.message || 'Failed to update flows');
     } finally {
       setBusy(false);
+    }
+  };
+
+  const applyTpsConfig = async () => {
+    const min = Number(tpsMin);
+    const max = Number(tpsMax);
+    if (!Number.isFinite(min) || !Number.isFinite(max) || min <= 0 || max <= 0) {
+      setFeedback('TPS values must be numbers greater than 0');
+      return;
+    }
+    if (min > max) {
+      setFeedback('Minimum TPS must be less than or equal to maximum TPS');
+      return;
+    }
+
+    setConfigBusy(true);
+    setFeedback('');
+    try {
+      await fetchJson('/load/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ total_tps_min: min, total_tps_max: max })
+      });
+      setConfigDirty(false);
+      await refreshStatus();
+      setFeedback('TPS configuration applied');
+    } catch (error) {
+      setFeedback(error.message || 'Failed to apply TPS configuration');
+    } finally {
+      setConfigBusy(false);
     }
   };
 
@@ -53,6 +103,45 @@ export default function LoadControlPage() {
       <main className="content load-grid">
         <section>
           <h2>Flow Controls</h2>
+          <div className="tps-panel">
+            <h3>TPS Controls</h3>
+            <div className="tps-fields">
+              <label>
+                Min TPS
+                <input
+                  type="number"
+                  min="0.1"
+                  step="0.1"
+                  value={tpsMin}
+                  onChange={(e) => {
+                    setConfigDirty(true);
+                    setTpsMin(e.target.value);
+                  }}
+                />
+              </label>
+              <label>
+                Max TPS
+                <input
+                  type="number"
+                  min="0.1"
+                  step="0.1"
+                  value={tpsMax}
+                  onChange={(e) => {
+                    setConfigDirty(true);
+                    setTpsMax(e.target.value);
+                  }}
+                />
+              </label>
+              <button disabled={configBusy || busy} onClick={applyTpsConfig}>Apply TPS</button>
+            </div>
+            <p className="note">
+              Target total TPS range: {status?.target_total_tps_min ?? 0} to {status?.target_total_tps_max ?? 0}
+            </p>
+            <p className="note">
+              Effective TPS with active flows: {status?.effective_total_tps_min ?? 0} to {status?.effective_total_tps_max ?? 0}
+            </p>
+            {feedback ? <p className="note">{feedback}</p> : null}
+          </div>
           <div className="control-actions">
             <button disabled={busy} onClick={() => postJson('/load/start', { flows: FLOW_NAMES })}>START ALL</button>
             <button disabled={busy} className="danger" onClick={() => postJson('/load/stop-all')}>STOP ALL</button>

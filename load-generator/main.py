@@ -2,7 +2,7 @@ import asyncio
 import logging
 import os
 from contextlib import suppress
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -11,11 +11,13 @@ from pydantic import BaseModel, Field
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 
 from load_runner import (
+    get_runtime_config,
     run_account_flow,
     run_card_flow,
     run_login_flow,
     run_payment_flow,
     run_transaction_flow,
+    update_runtime_config,
 )
 from metrics_store import MetricsStore
 
@@ -49,11 +51,18 @@ FLOW_RUNNERS = {
     "PAYMENT_FLOW": run_payment_flow,
 }
 
-AUTO_START_FLOWS = os.getenv("AUTO_START_FLOWS", "true").strip().lower() in {"1", "true", "yes", "y", "on"}
+AUTO_START_FLOWS = os.getenv("AUTO_START_FLOWS", "false").strip().lower() in {"1", "true", "yes", "y", "on"}
 
 
 class FlowRequest(BaseModel):
     flows: List[str] = Field(default_factory=list)
+
+
+class LoadConfigRequest(BaseModel):
+    total_tps_min: Optional[float] = Field(default=None, gt=0)
+    total_tps_max: Optional[float] = Field(default=None, gt=0)
+    screen_flow_count: Optional[float] = Field(default=None, gt=0)
+    gateway_url: Optional[str] = None
 
 
 def _normalize_flows(requested: List[str]) -> List[str]:
@@ -63,6 +72,17 @@ def _normalize_flows(requested: List[str]) -> List[str]:
     if invalid:
         raise HTTPException(status_code=400, detail=f"Invalid flows: {', '.join(invalid)}")
     return requested
+
+
+def _effective_total_tps_bounds(flows_active: Dict[str, bool], cfg: Dict[str, float]) -> tuple[float, float]:
+    active_flow_count = sum(1 for active in flows_active.values() if active)
+    if active_flow_count == 0:
+        return 0.0, 0.0
+
+    ratio = active_flow_count / max(1.0, float(cfg["screen_flow_count"]))
+    min_tps = float(cfg["total_tps_min"]) * ratio
+    max_tps = float(cfg["total_tps_max"]) * ratio
+    return round(min_tps, 2), round(max_tps, 2)
 
 
 async def _start_requested_flows(requested: List[str]) -> List[str]:
@@ -105,7 +125,43 @@ async def health():
 
 @app.get("/load/status")
 async def load_status():
-    return await store.get_summary()
+    summary = await store.get_summary()
+    cfg = get_runtime_config()
+    effective_min_tps, effective_max_tps = _effective_total_tps_bounds(summary["flows_active"], cfg)
+    summary.update(
+        {
+            "target_total_tps_min": round(float(cfg["total_tps_min"]), 2),
+            "target_total_tps_max": round(float(cfg["total_tps_max"]), 2),
+            "screen_flow_count": round(float(cfg["screen_flow_count"]), 2),
+            "effective_total_tps_min": effective_min_tps,
+            "effective_total_tps_max": effective_max_tps,
+            "gateway_url": cfg["gateway_url"],
+        }
+    )
+    return summary
+
+
+@app.get("/load/config")
+async def get_load_config():
+    return get_runtime_config()
+
+
+@app.post("/load/config")
+async def set_load_config(req: LoadConfigRequest):
+    current = get_runtime_config()
+
+    next_min = req.total_tps_min if req.total_tps_min is not None else float(current["total_tps_min"])
+    next_max = req.total_tps_max if req.total_tps_max is not None else float(current["total_tps_max"])
+    if next_min > next_max:
+        raise HTTPException(status_code=400, detail="total_tps_min must be less than or equal to total_tps_max")
+
+    updated = update_runtime_config(
+        total_tps_min=req.total_tps_min,
+        total_tps_max=req.total_tps_max,
+        screen_flow_count=req.screen_flow_count,
+        gateway_url=req.gateway_url,
+    )
+    return {"message": "Load configuration updated", "config": updated}
 
 
 @app.post("/load/start")
