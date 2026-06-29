@@ -1,6 +1,6 @@
 # P1-T4 Splunk Ingestion Pipeline Validation
 
-This runbook validates Splunk ingestion using the existing hardcoded `splunk_hec` mapping in `otel-collector-config.yaml`.
+This runbook validates Splunk ingestion using the `splunk_hec` mapping in `otel-collector-config.yaml`.
 
 Scope covered:
 - Validate exporter mapping (endpoint, token, source, sourcetype, index)
@@ -9,8 +9,8 @@ Scope covered:
 
 ## 1. Assumptions
 
-- Splunk is running and reachable at `http://10.235.21.132:8088/services/collector` from the `otel-collector` container.
-- Splunk HEC token in `otel-collector-config.yaml` is valid and allowed to write to index `banking`.
+- Splunk HEC is reachable from the `otel-collector` container at the URL configured in `.env.local` (`SPLUNK_HEC_ENDPOINT`).
+- Splunk HEC token in `.env.local` (`SPLUNK_HEC_TOKEN`) is valid and allowed to write to index configured in `SPLUNK_INDEX`.
 - P1-T1 and P1-T2 are already implemented (structured logs + correlation propagation).
 - Stack is started from repo root with `docker compose up --build`.
 

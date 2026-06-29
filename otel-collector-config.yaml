@@ -21,13 +21,20 @@ processors:
 exporters:
   prometheus:
     endpoint: "0.0.0.0:8889"
+  prometheusremotewrite:
+    endpoint: "${PROMETHEUS_REMOTE_WRITE_ENDPOINT}"
   splunk_hec:
-    endpoint: "https://10.235.21.132:8088/services/collector"
+    endpoint: "${SPLUNK_HEC_ENDPOINT}"
     token: "${SPLUNK_HEC_TOKEN}"
     source: "banking-app"
     sourcetype: "java-otel"
-    index: "banking"
+    index: "${SPLUNK_INDEX}"
     tls: { insecure_skip_verify: true }
+  elasticsearch/opensearch:
+    endpoints: ["${OPENSEARCH_ENDPOINT}"]
+    logs_index: "${OPENSEARCH_LOGS_INDEX}"
+  otlphttp/jaeger:
+    traces_endpoint: "${JAEGER_TRACES_ENDPOINT}"
   logging:
     verbosity: detailed
 
@@ -36,12 +43,12 @@ service:
     traces:
       receivers: [otlp]
       processors: [memory_limiter, batch]
-      exporters: [logging]
+      exporters: [otlphttp/jaeger, logging]
     metrics:
       receivers: [otlp, prometheus]
       processors: [memory_limiter, batch]
-      exporters: [prometheus, logging]
+      exporters: [prometheus, prometheusremotewrite, logging]
     logs:
       receivers: [otlp]
       processors: [memory_limiter, batch]
-      exporters: [splunk_hec, logging]
+      exporters: [splunk_hec, elasticsearch/opensearch, logging]

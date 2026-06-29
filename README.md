@@ -82,6 +82,19 @@ Secret handling for Splunk HEC token:
 docker compose --env-file .env.local up --build
 ```
 
+Telemetry routing in `.env.local`:
+- `SPLUNK_HEC_ENDPOINT` (logs to Splunk HEC, typically `http://<host>:8088/services/collector`)
+- `SPLUNK_INDEX` (Splunk index, e.g. `banking`)
+- `OPENSEARCH_ENDPOINT` (logs to OpenSearch, e.g. `http://10.235.21.132:9200`)
+- `OPENSEARCH_LOGS_INDEX` (OpenSearch logs index, e.g. `banking`)
+- `PROMETHEUS_REMOTE_WRITE_ENDPOINT` (metrics remote write endpoint, e.g. `http://10.235.21.132:9090/api/v1/write`)
+- `JAEGER_TRACES_ENDPOINT` (trace ingest endpoint, e.g. `http://10.235.21.132:8080/jaeger/api/traces`)
+
+Current collector behavior:
+- Logs exported to both Splunk HEC and OpenSearch.
+- Metrics exported to local Prometheus scrape endpoint (`:8889`) and Prometheus remote-write endpoint.
+- Traces exported to Jaeger endpoint.
+
 Stop and remove containers:
 
 ```bash

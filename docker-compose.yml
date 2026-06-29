@@ -7,6 +7,12 @@ services:
     command: ["--config=/etc/otel/config.yaml"]
     environment:
       SPLUNK_HEC_TOKEN: ${SPLUNK_HEC_TOKEN}
+      SPLUNK_HEC_ENDPOINT: ${SPLUNK_HEC_ENDPOINT}
+      SPLUNK_INDEX: ${SPLUNK_INDEX}
+      OPENSEARCH_ENDPOINT: ${OPENSEARCH_ENDPOINT}
+      OPENSEARCH_LOGS_INDEX: ${OPENSEARCH_LOGS_INDEX}
+      PROMETHEUS_REMOTE_WRITE_ENDPOINT: ${PROMETHEUS_REMOTE_WRITE_ENDPOINT}
+      JAEGER_TRACES_ENDPOINT: ${JAEGER_TRACES_ENDPOINT}
     volumes:
       - ./otel-collector-config.yaml:/etc/otel/config.yaml:ro
     ports:
